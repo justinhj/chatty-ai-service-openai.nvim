@@ -1,5 +1,7 @@
 local chatty = require('chatty-ai')
 
+-- This supports chatty ai openai compatible completion
+
 -- https://platform.openai.com/docs/api-reference/chat
 
 -- > curl https://api.openai.com/v1/chat/completions \
@@ -34,9 +36,8 @@ local chatty = require('chatty-ai')
 local default_config = {
   api_key_name = 'OPENAI_API_KEY',
   model = 'gpt-4o',
+  url = 'https://api.openai.com/v1/chat/completions',
 }
-
-local OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
 
 local source = {}
 
@@ -52,10 +53,10 @@ end
 -- return url, headers, body
 source.configure_call = function(self, user_prompt, completion_config, is_stream)
   local config = self.config
-  local url = OPENAI_URL
+  local url = self.config.url
   local api_key = os.getenv(config.api_key_name)
   if not api_key then
-    error('OpenAI api key \'' .. config.api_key_name .. '\' not found in environment.')
+    error('OpenAI (or compatible service) api key \'' .. config.api_key_name .. '\' not found in environment.')
   end
   local headers = {
       ['Authorization'] = 'Bearer ' .. api_key,
@@ -79,7 +80,6 @@ source.configure_call = function(self, user_prompt, completion_config, is_stream
     body['stream_options'] = { include_usage = is_stream }
   end
 
-  vim.print(vim.inspect(headers) .. vim.inspect(body))
   return url, headers, body
 end
 
